@@ -1,46 +1,29 @@
 import java.awt.*;
 
-/**
- * Saab95 is a subclass to Car and holds all attributes a Saab95 has.
- *
- */
-public class Saab95 extends Car{
-    /**
-     * Saab95 has the individual attribute 'turbo' which can be turned on/off.
-     * The state of the turbo affects the speed.
-     */
+public class Saab95 extends PassengerCar{
+
     private boolean turboOn;
 
-    /**
-     * The constructor of Saab95.
-     * This constructor inherits the constructor of the superclass with appropriate arguments of a Saab95.
-     * It also turn the turbo off.
-     */
     public Saab95(){
-        super(2, Color.red, 125, "Saab95");
-	    this.turboOn = false;
+        super(Color.red, "Saab95", 1710, 125, 2);
+        this.turboOn = false;
     }
 
-    /**
-     * Method to turn on the turbo.
-     */
+    // section for getters:
+
+    // section for setter:
+
+    // section for functional methods:
+
     public void setTurboOn(){
-	    turboOn = true;
+        turboOn = true;
     }
 
-    /**
-     * Method to turn the turbo off.
-     */
     public void setTurboOff(){
-	    turboOn = false;
+        turboOn = false;
     }
 
-    /**
-     * Method that defines the abstract method speedFactor from the superclass.
-     * Calculates the speed factor from a formula made for Saab95
-     * @return The speedFactor
-     */
-    @Override
+    // section for overridden methods:
     public double speedFactor(){
         double turbo = 1;
         if(turboOn) turbo = 1.3;

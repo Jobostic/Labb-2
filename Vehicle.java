@@ -2,11 +2,10 @@ import java.awt.*;
 
 public abstract class Vehicle implements Movable{
 
-    private int nrDoors; // Number of doors on the car
-    private double enginePower; // Engine power of the car
     private double currentSpeed; // The current speed of the car
     private Color color; // Color of the car
     private String modelName; // The car model name
+    private double weight;
     private double posX; // Every Cars position in x-direction
     private double posY; // Every Cars position in y-direction
     private int direction; // Every Cars direction
@@ -15,207 +14,136 @@ public abstract class Vehicle implements Movable{
     public static final int SOUTH = 2;
     public static final int WEST = 3;
 
-    public Vehicle(int nrDoors, Color color, double enginePower, String modelName){
-        this.nrDoors = nrDoors;
+    public Vehicle(Color color, String modelName, double weight){
         this.color = color;
-        this.enginePower = enginePower;
         this.modelName = modelName;
+        this.weight = weight;
         this.direction = NORTH;
         this.posX = 0;
         this.posY = 0;
-        stopEngine();
+        this.currentSpeed = 0;
     }
 
-    /**
-     * Getter for nrDoors.
-     * @return
-     */
-    public int getNrDoors(){
-        return nrDoors;
+    // Section for getters:
+
+    public double getWeight(){
+        return weight;
     }
 
-    /**
-     * Getter for enginePower
-     * @return
-     */
-    public double getEnginePower(){
-        return enginePower;
-    }
-
-    /**
-     * Setter for current speed
-     * @param amount Decides what the speed will be set to.
-     */
-
-    private void setCurrentSpeed(double amount){
-        this.currentSpeed = amount;
-    }
-
-    /**
-     * Getter for currentSpeed
-     * @return
-     */
     public double getCurrentSpeed(){
         return currentSpeed;
     }
 
-    public abstract double speedFactor();
-
-
-    /**
-     * Method to decrease the speed.
-     * This method limits decrementSpeed() to decrease the speed by at most the speedfactor every time the method is called.
-     * It also makes it impossible for the car to go forward when doing so.
-     * If the argument lies outside the interval, an exception will be thrown.
-     * @param amount The argument you send to decrementSpeed()
-     */
-
-    /**
-     * Getter for model name.
-     */
     public String getName(){
         return modelName;
     }
 
-
-    /**
-     * Getter for color
-     * @return
-     */
     public Color getColor(){
         return color;
     }
 
-    /**
-     * Setter for color
-     * @param clr
-     */
-    public void setColor(Color clr){
-        color = clr;
-    }
-
-    /**
-     * When engine is started, the Car starts moving slowly.
-     */
-    public void startEngine(){
-        currentSpeed = 0.1;
-    }
-
-    /**
-     * When engine is turned off, the Car stops moving.
-     */
-    public void stopEngine() {
-        currentSpeed = 0;
-    }
-
-    /**
-     * Method to set the car's direction before driving it.
-     * @param direction Decides what direction the car will face.
-     */
-    private void setDirection(int direction){
-        this.direction = direction;
-    }
-
-    /**
-     * Getter for the car's direction.
-     * @return
-     */
     public int getDirection(){
         return direction;
     }
 
-    /**
-     * Getter for the car's x-coordinate
-     * @return x-coordinate
-     */
     public double getX(){
         return posX;
     }
 
-    /**
-     * Getter for the car's y-coordinate
-     * @return y-coordinate
-     */
     public double getY(){
         return posY;
     }
 
-    /**
-     * Setter for x-coordinate
-     * @param posX x-coordinate
-     */
+    // Section for setters:
+
+    private void setWeight(double weight){
+        this.weight = weight;
+    }
+
+    public void setCurrentSpeed(double amount){
+        this.currentSpeed = amount;
+    }
+
+    private void setName(String modelName) {
+        this.modelName = modelName;
+    }
+
+    private void setColor(Color color) {
+        this.color = color;
+    }
+
+    private void setDirection(int direction){
+        this.direction = direction;
+    }
+
     public void setX(double posX){
         this.posX = posX;
     }
-    /**
-     * Setter for y-coordinate
-     * @param posY y-coordinate
-     */
+
     public void setY(double posY){
         this.posY = posY;
     }
 
-    /**
-     * Increases the current speed by the amount multiplied by the speed factor.
-     * Speed cannot exceed the enginepower.
-     * @param amount Decides how much the speed will increase.
-     */
-    public void incrementSpeed(double amount){
-        currentSpeed = Math.min(getCurrentSpeed() + speedFactor() * amount,getEnginePower());
+    // Section for abstract methods:
+
+    public abstract double speedFactor();
+
+    //Section for supporting methods:
+
+    public void vehicleIsStationary(String error){
+        if (getCurrentSpeed() == 0){
+            return;
+        }
+        else{
+            throw new IllegalArgumentException("The vehicle is moving!");
+        }
     }
 
-    /**
-     * Decrease the current speed by the amount multiplied by the speed factor.
-     * Speed cannot be negative.
-     * @param amount Decides how much the speed will decrease.
-     */
+    public void vehicleIsMoving(String error){
+        if(getCurrentSpeed() > 0) {
+            return;
+        }
+        else{
+            throw new IllegalArgumentException(error);
+        }
+    }
+
+    public void nrIsInInterval(double nr,double lowerBound, double upperBound, String error){
+        if(nr >= lowerBound && nr <= upperBound){
+            return;
+        }
+        else{
+            throw new IllegalArgumentException(error);
+        }
+    }
+
+    public void nrIsPositive(double nr,String error){
+        if(nr >= 0){
+            return;
+        }
+        else{
+            throw new IllegalArgumentException(error);
+        }
+    }
+
+    // Section for functional methods:
+
+    // Will get limitations to engine power in those classes that have engines
+    public void incrementSpeed(double amount){
+        currentSpeed = getCurrentSpeed() + speedFactor() * amount;
+    }
+
     public void decrementSpeed(double amount){
         currentSpeed = Math.max(getCurrentSpeed() - speedFactor() * amount,0);
     }
 
-    /**
-     * Method to increase the speed.
-     * This method limits incrementSpeed() to increase the speed by at most the speedfactor every time the method is called.
-     * It also makes it impossible for the car to go backwards when doing so.
-     * If the argument lies outside the interval, an exception will be thrown.
-     * @param amount The argument you send to incrementSpeed()
-     */
-    public void gas(double amount) {
-        if (getCurrentSpeed() > 0) {
-            if (0 <= amount && amount <= 1) {
-                incrementSpeed(amount);
-            } else {
-                throw new IllegalArgumentException("Values have to be in interval [0,1]");
-            }
-        } else {
-            throw new IllegalArgumentException("Start engine first");
-        }
-    }
-
-    /**
-     * Method to decrease the speed.
-     * This method limits decrementSpeed() to decrease the speed by at most the speedfactor every time the method is called.
-     * It also makes it impossible for the car to go forward when doing so.
-     * If the argument lies outside the interval, an exception will be thrown.
-     * @param amount The argument you send to decrementSpeed()
-     */
     public void brake(double amount){
-        if (getCurrentSpeed() > 0) {
-            if (0 <= amount && amount <= 1) {
-                decrementSpeed(amount);
-            } else {
-                throw new IllegalArgumentException("Values have to be in interval [0,1]");
-            }
-        } else {
-            throw new IllegalArgumentException("The car is not moving");
-        }
+        nrIsPositive(amount, "Amount must be positive");
+        vehicleIsMoving("The vehicle is already standing still!");
+        nrIsInInterval(amount,0,1,"Amount is outside interval [0,1]");
+        decrementSpeed(amount);
     }
 
-    /**
-     * Method to make the car move in a x/y coordinate system.
-     * Implemented from the interface Movable.
-     * The position variables posX and posY increases/decreases depending on what direction the car faces and what the current speed of the car is att that moment.
-     */
     public void move(){
         if(getDirection() == NORTH){
             posY = posY + getCurrentSpeed();
@@ -231,10 +159,6 @@ public abstract class Vehicle implements Movable{
         }
     }
 
-    /**
-     * Method to change the car's direction 90° to the left.
-     * Implemented from the interface Movable.
-     */
     public void turnLeft(){
         if(getDirection() == NORTH){
             setDirection(WEST);
@@ -250,10 +174,6 @@ public abstract class Vehicle implements Movable{
         }
     }
 
-    /**
-     * Method to change the car's direction 90° to the right.
-     * Implemented from the interface Movable.
-     */
     public void turnRight(){
         if(getDirection() == NORTH){
             setDirection(EAST);
@@ -268,4 +188,5 @@ public abstract class Vehicle implements Movable{
             setDirection(NORTH);
         }
     }
+
 }
