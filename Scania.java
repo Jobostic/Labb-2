@@ -1,66 +1,61 @@
 import java.awt.*;
 import java.util.ArrayList;
 
-public class Scania extends Truck{
+public class Scania<O extends Object> extends Truck{
 
-    private ArrayList<ScentedCandles> storage;
-    private int storageCapacity;
-    private int nrContainedObjects;
+    private Loader<O> loader;
 
     public Scania(int storageCapacity){
         super(Color.orange, "Streamline", 4000, 730,2);
-        this.storageCapacity = storageCapacity;
-        this.storage = new ArrayList<ScentedCandles>(storageCapacity);
-        this.nrContainedObjects = storage.size();
+        this.loader = new Loader<O>(storageCapacity, 4000);
     }
 
     // section for getters:
 
-    public ArrayList<ScentedCandles> getStorage(){
-        return storage;
+    public ArrayList<O> getStorage(){
+        return loader.getStorage();
     }
 
     public int getStorageCapacity(){
-        return storageCapacity;
+        return loader.getStorageCapacity();
     }
 
     public int getNrContainedObjects(){
-        return nrContainedObjects;
+        return loader.getNrContainedObjects();
     }
 
     // section for setters:
     public void setStorageCapacity(int capacity){
-        storageCapacity = capacity;
+        loader.setStorageCapacity(capacity);
     }
 
     // section for supporting methods
 
-    public void checkIfFull(ArrayList<ScentedCandles> storage){
-        if(storage.size() < getStorageCapacity()){
-            return;
-        }
-        else{
-            throw new IllegalArgumentException("Storage is full!");
-        }
+    public void checkIfFull(ArrayList<O> storage){
+        loader.checkIfFull(storage);
     }
 
     // section for functional methods:
-
-    public void loadObject(ScentedCandles frankeeCandle) {
-        checkIfFull(getStorage());
-        getStorage().add(frankeeCandle);
+    public void loadObject(O object) {
+        loader.loadObject(object);
     }
 
-    public void unloadObject(ScentedCandles frankeeCandle){
-        if(storage.contains(frankeeCandle)){
-            storage.remove(frankeeCandle);
-        }
+    public void unloadObject(O object){
+        loader.unloadObject(object, Loader.fromBehind);
     }
 
-    public void emptyStorage() {
-        if(storage.size() != 0){
-            storage.clear();
-        }
+    public void unloadAllObjects() {
+        loader.unloadAllObjects(Loader.fromBehind);
     }
 
+    // section for overridden methods:
+
+    @Override
+    public void move(){
+        loader.setX(getX());
+        loader.setY(getY());
+        loader.setDirection(getDirection());
+        super.move();
+        loader.moveWithCurrentSpeed(getCurrentSpeed());
+    }
 }

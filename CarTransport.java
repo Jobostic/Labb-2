@@ -5,65 +5,51 @@ public class CarTransport extends Truck{
 
     private final double rampDown = 35;
     private final double rampUp = 0;
-    private ArrayList<PassengerCar> storage;
-    private int storageCapacity;
-    private int nrContainedObjects;
     private boolean rampDwn;
+    private Loader<PassengerCar> loader;
 
 
     public CarTransport(int storageCapacity){
         super(Color.blue, "Transporter", 4000, 750, 2);
-        this.storageCapacity = storageCapacity;
-        this.storage = new ArrayList<PassengerCar>(storageCapacity);
-        this.nrContainedObjects = storage.size();
+        this.loader = new Loader<PassengerCar>(storageCapacity,4000);
     }
 
     // section for getters:
 
     public ArrayList<PassengerCar> getStorage(){
-        return storage;
+        return loader.getStorage();
     }
 
     public int getStorageCapacity(){
-        return storageCapacity;
+       return loader.getStorageCapacity();
     }
 
     public int getNrContainedObjects(){
-        return storage.size();
+        return loader.getNrContainedObjects();
+    }
+
+    public Loader<PassengerCar> getLoader(){
+        return loader;
     }
 
     // section for setters:
+
     public void setStorageCapacity(int capacity){
-        storageCapacity = capacity;
+       loader.setStorageCapacity(capacity);
     }
 
     // section for supporting methods:
 
     public void checkIfFull(ArrayList<PassengerCar> storage){
-        if(storage.size() < getStorageCapacity()){
-            return;
-        }
-        else{
-            throw new IllegalArgumentException("Storage is full!");
-        }
+        loader.checkIfFull(storage);
     }
 
     public void checkWeight(PassengerCar car, double allowedWeight){
-        if(car.getWeight() <= allowedWeight){
-            return;
-        }
-        else{
-            throw new IllegalArgumentException("Too heavy!");
-        }
+        loader.checkWeight(car, allowedWeight);
     }
 
     public void checkIfCloseEnough(PassengerCar c, double xAway, double yAway){
-        if(Math.abs(c.getX() - getX()) <= xAway && Math.abs(c.getY() - getY()) <= yAway){
-            return;
-        }
-        else{
-            throw new IllegalArgumentException("Move closer!");
-        }
+        loader.checkIfCloseEnough(c, xAway, yAway);
     }
 
     public void checkIfRampDown(){
@@ -94,61 +80,56 @@ public class CarTransport extends Truck{
 
 
     public void loadCar(PassengerCar car) {
-        checkWeight(car, 2000);
         checkIfRampDown();
-        checkIfCloseEnough(car,1,1);
-        checkIfFull(getStorage());
-        getStorage().add(car);
-        car.setX(getX());
-        car.setY(getY());
+        loader.loadObject(car);
     }
 
     private void unloadInDirection(int i){
-        if(getDirection() == NORTH) {
-            storage.get(i).setY(getY() - 1);
-        }
-        else if(getDirection() == EAST){
-            storage.get(i).setX(getX() - 1);
-        }
-        else if(getDirection() == SOUTH){
-            storage.get(i).setY(getY() + 1);
-        }
-        else if(getDirection() == WEST){
-            storage.get(i).setX(getX() + 1);
-        }
-        storage.remove(i);
+        loader.unloadFromBehind(i);
     }
 
     public void unloadCar(PassengerCar c){
+        loader.setDirection(getDirection());
         checkIfRampDown();
-        int size = storage.size();
-        int position = storage.indexOf(c);
+        int size = loader.getNrContainedObjects();
+        int position = loader.getIndexOfStorage(c);
         ArrayList<PassengerCar> otherCars = new ArrayList<PassengerCar>();
         for(int i = size; i > position+1; i--){
-            otherCars.add(storage.get(i-1));
-            storage.remove(i-1);
+            otherCars.add(loader.getStorage().get(i-1));
+            loader.getStorage().remove(i-1);
         }
-        unloadInDirection(position);
+        loader.unloadFromBehind(position);
         for(int i = otherCars.size(); i > 0; i--){
-            storage.add(otherCars.get(i-1));
+            loader.getStorage().add(otherCars.get(i-1));
         }
     }
 
     public void unloadAllCars(){
         checkIfRampDown();
-        int size = storage.size();
-        for(int i = size; i > 0; i--){
-            unloadInDirection(i-1);
-        }
+        loader.unloadAllObjects(Loader.fromBehind);
     }
+
+    // section for overridden methods:
 
     @Override
     public void move(){
-        isAngleZero();
+        loader.setX(getX());
+        loader.setY(getY());
+        loader.setDirection(getDirection());
         super.move();
-        for(int i = 0; i < storage.size(); i++){
-            storage.get(i).setX(getX());
-            storage.get(i).setY(getY());
+        loader.moveWithCurrentSpeed(getCurrentSpeed());
+    }
+
+    @Override
+    public void setTrailerAngle(double angle){
+        if(angle == 35){
+            super.setTrailerAngle(35);
+        }
+        else if(angle == 0){
+            super.setTrailerAngle(0);
+        }
+        else{
+            throw new IllegalArgumentException("The ramp can only have two modes, either up or down!");
         }
     }
 
